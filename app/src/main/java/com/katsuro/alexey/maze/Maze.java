@@ -35,58 +35,52 @@ public class Maze implements Drawable {
         generateMaze();
     }
 
-    private void generateMaze(){
-        for(int i=0; i<size;i++){
-            for (int j = 0; j<size;j++){
-                mArray[i][j] = i % 2 != 0 && j % 2 !=0
-                && i < size-1 && j < size -1;
+    private void generateMaze() {
+        for (int i = 0; i < size; ++i) {
+            for (int j = 0; j < size; ++j) {
+                mArray[i][j] = i % 2 != 0 && j % 2 != 0
+                        && i < size - 1 && j < size - 1;
             }
         }
-
         Random random = new Random();
         Stack<Point> stack = new Stack<>();
         stack.push(mEndPoint);
-
-        while (stack.size()>0){
+        while (stack.size() > 0) {
             Point current = stack.peek();
             List<Point> unusedNeighbors = new LinkedList<>();
             //left
-            if(current.x>2){
-                if(!isUsedCell(current.x-2,current.y)){
-                    unusedNeighbors.add(new Point(current.x-2,current.y));
+            if (current.x > 2) {
+                if (!isUsedCell(current.x - 2, current.y)) {
+                    unusedNeighbors.add(new Point(current.x - 2, current.y));
                 }
             }
-
             //top
-            if(current.y>2){
-                if(!isUsedCell(current.x,current.y-2)){
-                    unusedNeighbors.add(new Point(current.x,current.y-2));
+            if (current.y > 2) {
+                if (!isUsedCell(current.x, current.y - 2)) {
+                    unusedNeighbors.add(new Point(current.x, current.y - 2));
                 }
             }
-
-            //bottom
-            if(current.y<size-2){
-                if(!isUsedCell(current.x,current.y+2)){
-                    unusedNeighbors.add(new Point(current.x,current.y+2));
-                }
-            }
-
             //right
-            if(current.x<size-2){
-                if(!isUsedCell(current.x+2,current.y)){
-                    unusedNeighbors.add(new Point(current.x+2,current.y));
+            if (current.x < size - 2) {
+                if (!isUsedCell(current.x + 2, current.y)) {
+                    unusedNeighbors.add(new Point(current.x + 2, current.y));
                 }
             }
-
-            if(unusedNeighbors.size() > 0){
+            //bottom
+            if (current.y < size - 2) {
+                if (!isUsedCell(current.x, current.y + 2)) {
+                    unusedNeighbors.add(new Point(current.x, current.y + 2));
+                }
+            }
+            if (unusedNeighbors.size() > 0) {
                 int rnd = random.nextInt(unusedNeighbors.size());
                 Point direction = unusedNeighbors.get(rnd);
-                int diffX = (direction.x - current.x)/2;
-                int diffY = (direction.y - current.y)/2;
-                mArray[current.y+diffY][current.x+diffX] = true;
+                int diffX = (direction.x - current.x) / 2;
+                int diffY = (direction.y - current.y) / 2;
+                mArray[current.y + diffY][current.x + diffX] = true;
                 stack.push(direction);
             } else {
-                if(bestScore<stack.size()){
+                if (bestScore < stack.size()) {
                     bestScore = stack.size();
                     mStartPoint = current;
                 }
@@ -95,14 +89,14 @@ public class Maze implements Drawable {
         }
     }
 
-    private boolean isUsedCell(int x, int y){
-        if(x<0 || y<0 || x>size || y>size){
+    private boolean isUsedCell(int x, int y) {
+        if (x < 0 || y < 0 || x >= size - 1 || y >= size - 1) {
             return true;
         }
-        return mArray[y-1][x]
-        || mArray[y][x-1]
-        || mArray[y+1][x]
-        || mArray[y][x+1];
+        return mArray[y - 1][x]
+                || mArray[y][x - 1]
+                || mArray[y + 1][x]
+                || mArray[y][x + 1];
     }
 
     @Override
@@ -118,5 +112,22 @@ public class Maze implements Drawable {
                 }
             }
         }
+    }
+
+    public boolean isCrossroad(int x, int y) {
+
+        return true;
+    }
+
+    public boolean isWall(int x, int y){
+        return !mArray[y][x];
+    }
+
+    public Point getEndPoint() {
+        return mEndPoint;
+    }
+
+    public Point getStartPoint() {
+        return mStartPoint;
     }
 }
