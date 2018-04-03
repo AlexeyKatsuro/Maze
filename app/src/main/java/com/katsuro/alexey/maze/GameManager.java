@@ -1,6 +1,7 @@
 package com.katsuro.alexey.maze;
 
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -16,20 +17,24 @@ import java.util.List;
 public class GameManager extends GestureDetector.SimpleOnGestureListener{
 
     private static final String TAG = GameManager.class.getSimpleName();
-    private List<Drawable>  mDrawables;
+    private List<Drawable>  mDrawables = new ArrayList<>();
     private View mView;
     private Player mPlayer;
+    private Maze mMaze;
+    private Rect mRect = new Rect();
+    private int size;
 
     public GameManager() {
-        mDrawables = new ArrayList<>();
-
         mPlayer = new Player();
+        mMaze = new Maze(35);
+
+        mDrawables.add(mMaze);
         mDrawables.add(mPlayer);
     }
 
     public void draw(Canvas canvas){
         for (Drawable drawable : mDrawables){
-            drawable.draw(canvas);
+            drawable.draw(canvas,mRect);
         }
     }
 
@@ -45,5 +50,15 @@ public class GameManager extends GestureDetector.SimpleOnGestureListener{
         mPlayer.move(diffX,diffY);
         mView.invalidate();
         return super.onFling(e1, e2, velocityX, velocityY);
+    }
+
+    public void setScreenSize(int width, int height){
+        size = Math.min(width,height);
+        mRect.set(
+                (width-size)/2,
+                (height-size)/2,
+                (width+size)/2,
+                (height+size)/2
+        );
     }
 }
