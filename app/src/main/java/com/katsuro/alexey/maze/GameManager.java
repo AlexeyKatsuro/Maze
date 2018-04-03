@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,15 +22,24 @@ public class GameManager extends GestureDetector.SimpleOnGestureListener{
     private View mView;
     private Player mPlayer;
     private Maze mMaze;
+    private Exit mExit;
     private Rect mRect = new Rect();
-    private int size;
+    private int screenSize;
+    private int mazeSize = 5;
 
     public GameManager() {
-        mPlayer = new Player();
-        mMaze = new Maze(35);
+        create(mazeSize);
+    }
 
+    private void create(int mazeSize){
+        mMaze = new Maze(mazeSize);
+        mPlayer = new Player(mMaze.getEndPoint(),mazeSize);
+        mExit = new Exit(mMaze.getStartPoint(),mazeSize);
+
+        mDrawables.clear();
         mDrawables.add(mMaze);
         mDrawables.add(mPlayer);
+        mDrawables.add(mExit);
     }
 
     public void draw(Canvas canvas){
@@ -44,21 +54,52 @@ public class GameManager extends GestureDetector.SimpleOnGestureListener{
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        int diffX = 0, diffY = 0;
-        diffX = Math.round(-e1.getX()+ e2.getX());
-        diffY = Math.round(-e1.getY()+ e2.getY());
-        mPlayer.move(diffX,diffY);
+        int diffX, diffY;
+        diffX = Math.round(e2.getX() - e1.getX());
+        diffY = Math.round(e2.getY() - e1.getY());
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            diffX = diffX > 0 ? 1 : -1;
+            diffY = 0;
+        } else {
+            diffX = 0;
+            diffY = diffY > 0 ? 1 : -1;
+        }
+        int stepX = mPlayer.getX();
+        int stepY = mPlayer.getY();
+
+        while (!mMaze.isWall(stepX + diffX, stepY + diffY)) {
+            stepX += diffX;
+            stepY += diffY;
+            if (diffX != 0) {
+                if (!mMaze.isWall(stepX, stepY + 1)
+                        || !mMaze.isWall(stepX, stepY - 1)) {
+                    break;
+                }
+            }
+            if (diffY != 0) {
+                if (!mMaze.isWall(stepX + 1, stepY)
+                        || !mMaze.isWall(stepX - 1, stepY)) {
+                    break;
+                }
+            }
+        }
+
+        mPlayer.goTo(stepX, stepY);
+        if (mExit.getPoint().equals(mPlayer.getPoint())) {
+            create(mazeSize+=5);
+        }
+
         mView.invalidate();
         return super.onFling(e1, e2, velocityX, velocityY);
     }
 
     public void setScreenSize(int width, int height){
-        size = Math.min(width,height);
+        screenSize = Math.min(width,height);
         mRect.set(
-                (width-size)/2,
-                (height-size)/2,
-                (width+size)/2,
-                (height+size)/2
+                (width-screenSize)/2,
+                (height-screenSize)/2,
+                (width+screenSize)/2,
+                (height+screenSize)/2
         );
     }
 }
